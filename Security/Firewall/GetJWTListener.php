@@ -5,13 +5,12 @@ namespace Gfreeau\Bundle\GetJWTBundle\Security\Firewall;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Http\Firewall\ListenerInterface;
 use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -23,7 +22,7 @@ use InvalidArgumentException;
  *
  * @package Gfreeau\Bundle\GetJWTBundle\Security\Firewall
  */
-class GetJWTListener implements ListenerInterface
+class GetJWTListener
 {
     /**
      * @type
@@ -91,9 +90,9 @@ class GetJWTListener implements ListenerInterface
     }
 
     /**
-     * @param GetResponseEvent $event
+     * @param RequestEvent $event
      */
-    public function handle(GetResponseEvent $event)
+    public function __invoke(RequestEvent $event)
     {
         $request = $event->getRequest();
 
@@ -131,13 +130,13 @@ class GetJWTListener implements ListenerInterface
     }
 
     /**
-     * @param GetResponseEvent $event
+     * @param RequestEvent     $event
      * @param Request          $request
      * @param TokenInterface   $token
      *
      * @return Response
      */
-    protected function onSuccess(GetResponseEvent $event, Request $request, TokenInterface $token)
+    protected function onSuccess(RequestEvent $event, Request $request, TokenInterface $token)
     {
         if (null !== $this->logger) {
             $this->logger->info(sprintf('User "%s" has retrieved a JWT', $token->getUsername()));
@@ -153,13 +152,13 @@ class GetJWTListener implements ListenerInterface
     }
 
     /**
-     * @param GetResponseEvent        $event
+     * @param RequestEvent            $event
      * @param Request                 $request
      * @param AuthenticationException $failed
      *
      * @return Response
      */
-    protected function onFailure(GetResponseEvent $event, Request $request, AuthenticationException $failed)
+    protected function onFailure(RequestEvent $event, Request $request, AuthenticationException $failed)
     {
         if (null !== $this->logger) {
             $this->logger->info(sprintf('JWT request failed: %s', $failed->getMessage()));
